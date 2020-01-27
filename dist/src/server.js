@@ -19,7 +19,7 @@ class Server {
         }));
         app.use(body_parser_1.default.json());
         app.get("/", (req, resp) => {
-            resp.send("<h1>Hellllo</h1>");
+            resp.send("<a href='/books'>books</a>");
         });
         app.get("/books", (req, resp) => {
             book_1.default.find((err, books) => {
@@ -51,6 +51,44 @@ class Server {
                 }
                 else {
                     resp.send(book);
+                }
+            });
+        });
+        app.patch("/books/:id", (req, resp) => {
+            let id = req.params.id;
+            let oldBook = req.body;
+            book_1.default.findByIdAndUpdate(id, oldBook, (err, result) => {
+                if (err) {
+                    resp.status(500).send();
+                }
+                else {
+                    resp.send("updated successfully");
+                    console.log(result);
+                }
+            });
+        });
+        app.delete("/books/:id", (req, resp) => {
+            let id = req.params.id;
+            book_1.default.findByIdAndDelete(id, (err, result) => {
+                if (err) {
+                    resp.status(500).send();
+                }
+                else {
+                    resp.send("deleted successfully");
+                    console.log(result);
+                }
+            });
+        });
+        app.get("/books-search", (req, resp) => {
+            let p = parseInt(req.query.page || 1);
+            let size = parseInt(req.query.size || 5);
+            let keyword = req.query.keyword || "";
+            book_1.default.paginate({ title: { $regex: ".*(?i)" + keyword + ".*" } }, { page: p, limit: size }, (err, result) => {
+                if (err) {
+                    resp.status(500).send(err);
+                }
+                else {
+                    resp.send(result);
                 }
             });
         });
