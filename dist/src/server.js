@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const db_1 = __importDefault(require("./db"));
 const book_1 = __importDefault(require("../model/book"));
 const body_parser_1 = __importDefault(require("body-parser"));
+const cors_1 = __importDefault(require("cors"));
 class Server {
     constructor(port) {
         this.port = port;
@@ -14,6 +15,7 @@ class Server {
     }
     start() {
         const app = express_1.default();
+        app.use(cors_1.default());
         app.use(body_parser_1.default.urlencoded({
             extended: false
         }));
@@ -54,15 +56,15 @@ class Server {
                 }
             });
         });
-        app.patch("/books/:id", (req, resp) => {
+        app.put("/books/:id", (req, resp) => {
             let id = req.params.id;
             let oldBook = req.body;
-            book_1.default.findByIdAndUpdate(id, oldBook, (err, result) => {
+            book_1.default.findByIdAndUpdate(id, oldBook, { new: true }, (err, result) => {
                 if (err) {
                     resp.status(500).send();
                 }
                 else {
-                    resp.send("updated successfully");
+                    resp.send(result);
                     console.log(result);
                 }
             });
@@ -74,8 +76,8 @@ class Server {
                     resp.status(500).send();
                 }
                 else {
-                    resp.send("deleted successfully");
-                    console.log(result);
+                    resp.send(result);
+                    //console.log(result);
                 }
             });
         });

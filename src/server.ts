@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import Db from "./db";
 import Book from "../model/book";
 import bodyParser from "body-parser";
+import cors from "cors";
+
 export default class Server {
   constructor(private port: number) {
     Db.connect();
@@ -10,6 +12,8 @@ export default class Server {
 
   public start(): void {
     const app = express();
+
+    app.use(cors());
 
     app.use(
       bodyParser.urlencoded({
@@ -56,14 +60,14 @@ export default class Server {
       });
     });
 
-    app.patch("/books/:id", (req: Request, resp: Response) => {
+    app.put("/books/:id", (req: Request, resp: Response) => {
       let id = req.params.id;
       let oldBook = req.body;
-      Book.findByIdAndUpdate(id, oldBook, (err, result) => {
+      Book.findByIdAndUpdate(id, oldBook, { new: true }, (err, result) => {
         if (err) {
           resp.status(500).send();
         } else {
-          resp.send("updated successfully");
+          resp.send(result);
           console.log(result);
         }
       });
@@ -75,8 +79,8 @@ export default class Server {
         if (err) {
           resp.status(500).send();
         } else {
-          resp.send("deleted successfully");
-          console.log(result);
+          resp.send(result);
+          //console.log(result);
         }
       });
     });
